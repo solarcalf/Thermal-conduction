@@ -108,7 +108,7 @@ public:
 		std::cout << C[N - 1];
 		*/
 
-		x_grid = std::move(a);
+		x_grid = std::move(x);
 		v_vals = TMA(A, C, B, phi);
 	}
 };
