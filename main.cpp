@@ -36,9 +36,13 @@ int main(int argc, char* argv[]) {
 
 	auto x = solution.x_grid;
 	auto v = solution.v_vals;
+	auto u = solution.u_vals;
+	
+	
 
-	for (auto val : v)
-		cout << val << '\n';
+	for (size_t i = 0; i < v.size(); ++i)
+		cout << v[i] << "\t\t" << u[i] << "\t\t" << u[i] - v[i] << '\n';
+
 
 	return 0;
 }
