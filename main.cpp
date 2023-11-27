@@ -27,11 +27,11 @@ void write(const string& path, const thermal& solution) {
 
 	for (size_t i = 0; i < v.size(); ++i)
 		fout << x[i] << ' ';
-	cout << '\n';
+	fout << '\n';
 
 	for (size_t i = 0; i < v.size(); ++i)
 		fout << v[i] << ' ';
-	cout << '\n';
+	fout << '\n';
 
 	for (size_t i = 0; i < v.size(); ++i)
 		fout << u[i] << ' ';
@@ -59,7 +59,7 @@ void test_problem() {
 	pair<function<double(double)>, function<double(double)>> f = { f1, f2 };
 
 	thermal solution(0, 1, 100, k, q, f, mu1, mu2, xi);
-	thermal half_solution(0, 1, 100, k, q, f, mu1, mu2, xi);
+	thermal half_solution(0, 1, 200, k, q, f, mu1, mu2, xi);
 
 	write(path_main, solution);
 	write(path_half, half_solution);
