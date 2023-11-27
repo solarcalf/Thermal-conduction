@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "ThermalConduction.h"
 #include "TMA.h"
 
@@ -16,11 +17,36 @@ void TMA_test() {
 		cout << x << ' ';
 }
 
-int main(int argc, char* argv[]) {
+void write(const string& path, const thermal& solution) {
+	ofstream fout;
+	fout.open(path);
+
+	auto x = solution.x_grid;
+	auto v = solution.v_vals;
+	auto u = solution.u_vals;
+
+	for (size_t i = 0; i < v.size(); ++i)
+		fout << x[i] << ' ';
+	cout << '\n';
+
+	for (size_t i = 0; i < v.size(); ++i)
+		fout << v[i] << ' ';
+	cout << '\n';
+
+	for (size_t i = 0; i < v.size(); ++i)
+		fout << u[i] << ' ';
+	
+	fout.close();
+}
+
+void test_problem() {
+	string path_main = "main_method.txt";
+	string path_half = "half_method.txt";
 
 	double xi = 0.25;
 	double mu1 = 0;
 	double mu2 = 1;
+
 	function<double(double)> k1 = [](double x) {return 1.0 / 2; };
 	function<double(double)> k2 = [](double x) {return 1.25; };
 	function<double(double)> q1 = [](double x) {return 1; };
@@ -33,16 +59,15 @@ int main(int argc, char* argv[]) {
 	pair<function<double(double)>, function<double(double)>> f = { f1, f2 };
 
 	thermal solution(0, 1, 100, k, q, f, mu1, mu2, xi);
+	thermal half_solution(0, 1, 100, k, q, f, mu1, mu2, xi);
 
-	auto x = solution.x_grid;
-	auto v = solution.v_vals;
-	auto u = solution.u_vals;
-	
-	
+	write(path_main, solution);
+	write(path_half, half_solution);
+}
 
-	for (size_t i = 0; i < v.size(); ++i)
-		cout << v[i] << "\t\t" << u[i] << "\t\t" << u[i] - v[i] << '\n';
+int main(int argc, char* argv[]) {
 
+	test_problem();
 
 	return 0;
 }
