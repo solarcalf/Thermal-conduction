@@ -31,41 +31,37 @@ private:
 
 		Vec_FP a = Vec_FP(N);
 		Vec_FP d = Vec_FP(N - 1);
-		Vec_FP phi = Vec_FP(N);
+		Vec_FP phi = Vec_FP(N + 1);
 
 		for (size_t i = 1; i < N; i++) {
 			x_grid[i] = x_grid[i - 1] + h;
-			a[i - 1] = get_a(i);	// смещение индексов происходит из-за того, что мы используем 0-индексацию
+			a[i - 1] = get_a(i);	
 			d[i - 1] = get_d(i);
-			phi[i - 1] = get_phi(i);
+			phi[i] = get_phi(i);
 		}
 
 		x_grid[N] = x_grid[N - 1] + h;
 		a[N - 1] = get_a(N);
 		phi[0] = mu1;
-		phi[N - 1] = mu2;
+		phi[N] = mu2;
 
-		//======================= DEBUG ========================//
+		Vec_FP A = Vec_FP(N);
+		Vec_FP B = Vec_FP(N);
+		Vec_FP C = Vec_FP(N + 1);
 
-		//for (size_t i = 0; i < N - 1; i++)
-		//	std::cout << a[i] << ' ' << phi[i] << ' ' << d[i] << '\n';
-		//std::cout << a[N - 1] << ' ' << phi[N - 1] << '\n';
-		
-		//======================================================//
-
-		Vec_FP A = Vec_FP(N - 1);
-		Vec_FP B = Vec_FP(N - 1);
-		Vec_FP C = Vec_FP(N);
-
-		A[N - 2] = 0;
+		A[N - 1] = 0;
 		B[0] = 0;
 		C[0] = 1;
-		C[N - 1] = 1;
+		C[N] = 1;
 
-		for (size_t i = 0; i < N - 2; i++) {
+		for (size_t i = 0; i < N - 1; i++) {
 			A[i] = a[i] / pow(h, 2);
 			B[i + 1] = a[i + 1] / pow(h, 2);
 			C[i + 1] = -(a[i] + a[i + 1]) / pow(h, 2) - d[i];
+		}
+
+		for (size_t i = 1; i < N; i++){
+			phi[i] *= -1;
 		}
 
 		return { A, B, C, phi};
@@ -74,13 +70,23 @@ private:
 	inline void set_numeric_solution(const Vec_FP& A, const Vec_FP& C, const Vec_FP& B, const Vec_FP& phi) {
 		
 		//======================= DEBUG ========================//
-
-		//for (size_t i = 0; i < N - 2; i++)
-		//	std::cout << A[i] << ' ' << C[i + 1] << ' ' << B[i + 1] << '\n';
-		//
-		//std::cout << C[0] << ' ' << B[0] << '\n';
-		//std::cout << C[N - 1] << ' ' << A[N - 2] << '\n';
-
+		/*for (int i = 0; i < size(A); i++){
+			std::cout<<A[i]<<std::endl;
+		}
+		std::cout<<std::endl;
+		for (int i = 0; i < size(B); i++){
+			std::cout<<B[i]<<std::endl;
+		}
+		std::cout<<std::endl;
+		for (int i = 0; i < size(C); i++){
+			std::cout<<C[i]<<std::endl;
+		}
+		std::cout<<std::endl;
+		for (int i = 0; i < size(phi); i++){
+			std::cout<<phi[i]<<std::endl;
+		}
+		std::cout<<std::endl;
+		*/
 		//======================================================//
 		
 		v_vals = TMA(A, C, B, phi);
@@ -91,7 +97,7 @@ private:
 	inline FP get_a(size_t i) {
 		FP x = x_grid[i];
 		FP xl = x_grid[i] - h / 2;
-
+ 
 		if (xi >= x)
 			return k.first(xl);
 
@@ -167,11 +173,16 @@ public:
 private:
 
 	void set_real_solution() {
-		FP C1 = get_C1();
-		FP C2 = get_C2();
-		FP C3 = get_C3();
-		FP C4 = get_C4();
-
+		FP C1 = 0.58744204136927;
+		FP C2 = -1.5874420413627;
+		FP C3 = -16.23731986542228;
+		FP C4 = -23.37825943652864;
+		//======================= DEBUG ========================//
+		//std::cout<<C1<<std::endl;
+		//std::cout<<C2<<std::endl;
+		//std::cout<<C3<<std::endl;
+		//std::cout<<C4<<std::endl;
+		//======================================================//
 		u_vals.push_back(mu1);
 
 		for (FP x_i = x0 + h; x_i < xn; x_i += h) {
@@ -187,24 +198,6 @@ private:
 	}
 
 private:
-
-	FP get_C1() {
-		return -1 - get_C2();
-	}
-
-	FP get_C2() {
-		return (get_C4() * (exp(-1 / (8 * sqrt(5))) - exp(-7 / (8 * sqrt(5)))) - 39 * exp(-3 / (8 * sqrt(5))) + 39 + exp(sqrt(2) / 4)) / (exp(-sqrt(2) / 4) - exp(sqrt(2) / 4));
-	}
-
-	FP get_C3() {
-		return -39 * exp(-1 / (2 * sqrt(5))) - get_C4() * exp(-1 / sqrt(5));
-	}
-
-	FP get_C4() {
-		FP coef = (-sqrt(2) * (exp(-1 / (8 * sqrt(5))) - exp(-7 / (8 * sqrt(5)))) / (exp(2) / 2 - 1) + exp(-7 / (8 * sqrt(5))) / (2 * sqrt(5)) + exp(-1 / (8 * sqrt(5))) / (2 * sqrt(5)));
-		return (-39 / (2 * sqrt(5)) * exp(-3 / (8 * sqrt(5))) + sqrt(2) * exp(sqrt(2) / 4) + sqrt(2) * ((-39 * exp(-3 / (8 * sqrt(5))) + 39 + exp(sqrt(2) / 4)) / (exp(2) / 2 - 1))) / coef;
-	}
-
 #endif
 
 };
