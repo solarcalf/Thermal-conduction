@@ -18,37 +18,70 @@ void TMA_test() {
 }
 
 void write(const string& path, const thermal& solution) {
-	ofstream fout;
-	fout.open(path);
 
 	auto x = solution.x_grid;
 	auto v = solution.v_vals;
 	auto u = solution.u_vals;
 
-	for (size_t i = 0; i < v.size(); ++i)
-		fout << x[i] << ' ';
-	fout << '\n';
+	if (path == "v_values.txt") {
+		ofstream fout_x;
+		fout_x.open("x_grid.txt");
+		for (size_t i = 0; i < x.size(); ++i)
+			fout_x << x[i] << "\n";
+		fout_x.close();
 
-	for (size_t i = 0; i < v.size(); ++i)
-		fout << v[i] << ' ';
-	fout << '\n';
+		ofstream fout_v;
+		fout_v.open(path);
+		for (size_t i = 0; i < v.size(); ++i)
+			fout_v << v[i] << "\n";
+		fout_v.close();
 
-	for (size_t i = 0; i < v.size(); ++i)
-		fout << u[i] << ' ';
-	
-	fout.close();
+		ofstream fout_u;
+		fout_u.open("u_values.txt");
+		for (size_t i = 0; i < u.size(); ++i)
+			fout_u << u[i] << "\n";
+		fout_u.close();
 
-	
+		ofstream fout_e;
+		fout_e.open("e_vals_test.txt");
+		for (size_t i = 0; i < u.size(); ++i)
+			fout_e << fabs(u[i] - v[i]) << "\n";
+		fout_e.close();
+	}
+	else if (path == "v_half_values.txt") {
+		ofstream fout_x;
+		fout_x.open("x_half_grid.txt");
+		for (size_t i = 0; i < x.size(); ++i)
+			fout_x << x[i] << "\n";
+		fout_x.close();
+
+		ofstream fout_v;
+		fout_v.open(path);
+		for (size_t i = 0; i < v.size(); ++i)
+			fout_v << v[i] << "\n";
+		fout_v.close();
+	}
+
 	//std::cout << " x  |     v     |    u   |" << std::endl;
 	//for (size_t i = 0; i < v.size(); ++i){
 	//	std::cout << x[i] << "    "<< v[i] << "    "<< u[i]<<std::endl;
 	//}
-
 }
 
 void test_problem() {
-	string path_main = "main_method.txt";
-	string path_half = "half_method.txt";
+	ifstream source_fin;
+
+	source_fin.open("Source.txt");
+	if (!source_fin.is_open()) {
+		std::cout << "ERROR: Failed to open Source.txt" << std::endl;
+		exit(1);
+	}
+	size_t number;
+	source_fin >> number;
+	source_fin.close();
+
+	string path_main = "v_values.txt";
+	string path_half = "v_half_values.txt";
 
 	double xi = 0.25;
 	double mu1 = 0;
@@ -65,8 +98,23 @@ void test_problem() {
 	pair<function<double(double)>, function<double(double)>> q = { q1, q2 };
 	pair<function<double(double)>, function<double(double)>> f = { f1, f2 };
 
-	thermal solution(0, 1, 100, k, q, f, mu1, mu2, xi);
-	thermal half_solution(0, 1, 200, k, q, f, mu1, mu2, xi);
+	size_t main_N = number;
+	size_t double_N = number * 2;
+
+	thermal solution(0, 1, main_N, k, q, f, mu1, mu2, xi);
+	thermal half_solution(0, 1, double_N, k, q, f, mu1, mu2, xi);
+
+	auto v = solution.v_vals;
+	auto v_h = half_solution.v_vals;
+
+	size_t ni = 0;
+	ofstream fout_e;
+	fout_e.open("e_vals_main.txt");
+	for (size_t i = 0; i < v.size(); ++i) {
+		fout_e << fabs(v[i] - v_h[ni]) << "\n";
+		ni += 2;
+	}
+	fout_e.close();
 
 	write(path_main, solution);
 	write(path_half, half_solution);
