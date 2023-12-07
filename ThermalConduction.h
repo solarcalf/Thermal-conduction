@@ -185,8 +185,9 @@ private:
 		//======================================================//
 		u_vals.push_back(mu1);
 
-		for (FP x_i = x0 + h; x_i < xn; x_i += h) {
+		for (size_t i = 1; i < N; i++) {
 
+			FP x_i = static_cast<FP>(i) * h;
 			if (x_i <= xi)
 				u_vals.push_back(C1 * exp(sqrt(2) * x_i) + C2 * exp(-sqrt(2) * x_i) + 1);
 
