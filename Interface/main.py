@@ -300,9 +300,9 @@ class FirstScreen(Screen):
                 except FileNotFoundError:
                     print("ThermalConduction.exe not found")
 
-                with open('x_grid.txt', 'r') as file:
+                with open('x_grid_test.txt', 'r') as file:
                     self.x_vals = [float(line.strip()) for line in file]
-                with open('v_values.txt', 'r') as file:
+                with open('v_values_test.txt', 'r') as file:
                     self.v_vals = [float(line.strip()) for line in file]
                 with open('u_values.txt', 'r') as file:
                     self.u_vals = [float(line.strip()) for line in file]
