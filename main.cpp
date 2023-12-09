@@ -23,9 +23,9 @@ void write(const string& path, const thermal& solution) {
 	auto v = solution.v_vals;
 	auto u = solution.u_vals;
 
-	if (path == "v_values.txt") {
+	if (path == "v_values_test.txt") {
 		ofstream fout_x;
-		fout_x.open("x_grid.txt");
+		fout_x.open("x_grid_test.txt");
 		for (size_t i = 0; i < x.size(); ++i)
 			fout_x << x[i] << "\n";
 		fout_x.close();
@@ -48,9 +48,9 @@ void write(const string& path, const thermal& solution) {
 			fout_e << fabs(u[i] - v[i]) << "\n";
 		fout_e.close();
 	}
-	else if (path == "v_half_values.txt") {
+	else if (path == "v_values.txt") {
 		ofstream fout_x;
-		fout_x.open("x_half_grid.txt");
+		fout_x.open("x_grid.txt");
 		for (size_t i = 0; i < x.size(); ++i)
 			fout_x << x[i] << "\n";
 		fout_x.close();
@@ -61,6 +61,20 @@ void write(const string& path, const thermal& solution) {
 			fout_v << v[i] << "\n";
 		fout_v.close();
 	}
+	else if (path == "v_half_values.txt") {
+		ofstream fout_xx;
+		fout_xx.open("x_half_grid.txt");
+		for (size_t i = 0; i < x.size(); ++i)
+			fout_xx << x[i] << "\n";
+		fout_xx.close();
+
+		ofstream fout_v;
+		fout_v.open(path);
+		for (size_t i = 0; i < v.size(); ++i)
+			fout_v << v[i] << "\n";
+		fout_v.close();
+	}
+
 
 	//std::cout << " x  |     v     |    u   |" << std::endl;
 	//for (size_t i = 0; i < v.size(); ++i){
@@ -82,17 +96,29 @@ void test_problem() {
 
 	string path_main = "v_values.txt";
 	string path_half = "v_half_values.txt";
+	string path_test = "v_values_test.txt";
 
 	double xi = 0.25;
 	double mu1 = 0;
 	double mu2 = 1;
 
-	function<double(double)> k1 = [](double x) {return 1.0 / 2; };
-	function<double(double)> k2 = [](double x) {return 1.25; };
+	function<double(double)> k1_1 = [](double x) {return 1.0 / 2; };
+	function<double(double)> k2_1 = [](double x) {return 1.25; };
+	function<double(double)> q1_1 = [](double x) {return 1; };
+	function<double(double)> q2_1 = [](double x) {return 1.0 / 16; };
+	function<double(double)> f1_1 = [](double x) {return 1; };
+	function<double(double)> f2_1 = [](double x) {return 2.5; };
+
+	function<double(double)> k1 = [](double x) {return sqrt(x); };
+	function<double(double)> k2 = [](double x) {return x + 1; };
 	function<double(double)> q1 = [](double x) {return 1; };
-	function<double(double)> q2 = [](double x) {return 1.0 / 16; };
+	function<double(double)> q2 = [](double x) {return x * x; };
 	function<double(double)> f1 = [](double x) {return 1; };
-	function<double(double)> f2 = [](double x) {return 2.5; };
+	function<double(double)> f2 = [](double x) {return 2 + sqrt(x); };
+
+	pair<function<double(double)>, function<double(double)>> k_1 = { k1_1, k2_1 };
+	pair<function<double(double)>, function<double(double)>> q_1 = { q1_1, q2_1 };
+	pair<function<double(double)>, function<double(double)>> f_1 = { f1_1, f2_1 };
 
 	pair<function<double(double)>, function<double(double)>> k = { k1, k2 };
 	pair<function<double(double)>, function<double(double)>> q = { q1, q2 };
@@ -100,6 +126,8 @@ void test_problem() {
 
 	size_t main_N = number;
 	size_t double_N = number * 2;
+
+	thermal solution_test(0, 1, main_N, k_1, q_1, f_1, mu1, mu2, xi);
 
 	thermal solution(0, 1, main_N, k, q, f, mu1, mu2, xi);
 	thermal half_solution(0, 1, double_N, k, q, f, mu1, mu2, xi);
@@ -116,6 +144,7 @@ void test_problem() {
 	}
 	fout_e.close();
 
+	write(path_test, solution_test);
 	write(path_main, solution);
 	write(path_half, half_solution);
 }
